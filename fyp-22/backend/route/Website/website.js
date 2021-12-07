@@ -42,7 +42,7 @@ route.get("/", auth, async (req, res) => {
   res.json(null);
 });
 
-route.get("/inegration/:webid", async (req, res) => {
+route.get("/integration/:webid", async (req, res) => {
   console.log("website staus called how many time");
   await website.findOneAndUpdate(
     { webid: req.params.webid },

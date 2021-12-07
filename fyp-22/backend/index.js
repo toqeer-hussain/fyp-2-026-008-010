@@ -228,7 +228,7 @@ app.post("/tracker", async (req, res) => {
   console.log("value of track", track?._id);
   if (req.body.data) {
     const sale = new Sale({
-      promoterId: promoter.user.id,
+      promoterId: promoter.user._id,
       webid: webid.id,
       track: track?._id,
       orderid: req.body.orderid,

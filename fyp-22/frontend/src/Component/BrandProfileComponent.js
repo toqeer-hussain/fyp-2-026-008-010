@@ -260,7 +260,7 @@ export default function BrandProfileComponent() {
                 }}
               >
                 <textarea
-                  cols={60}
+                  cols={80}
                   spellCheck={false}
                   style={{
                     background: "inherit",
@@ -273,7 +273,7 @@ export default function BrandProfileComponent() {
                   readOnly
                   className="webscript"
                   cols="60"
-                  defaultValue={`<script async defer data-website-id="${webid}" src="http://localhost:3000/umami.js"></script>`}
+                  defaultValue={`<script async defer data-website-id="${webid}" src="http://localhost:3000/jvseatracking.js"></script>`}
                 />
               </div>
             </DialogContentText>
