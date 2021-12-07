@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   TextField,
@@ -75,22 +75,30 @@ let itemcategory = [
 // import { TextField } from "@material-ui/icons";
 
 export default function AdminTransaction() {
-  const [data, setdata] = useState(null);
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: data || {
-      bankname: "",
-      commission: "",
-      description: "",
-      category: "10",
-      domain: "",
-    },
-    validationSchema: websitvalidation,
-    onSubmit: (values) => {
-      console.log("vlaue of formik inside");
-      ApiCall.post("/website", values).then((result) => {});
-    },
-  });
+  const [data, setdata] = useState({});
+  const getdata = async () => {
+    const response = await ApiCall.get("/admintransstat");
+    console.log("recieved", response.data);
+    setdata(response.data);
+  };
+  useEffect(() => {
+    getdata();
+  }, []);
+  // const formik = useFormik({
+  //   enableReinitialize: true,
+  //   initialValues: data || {
+  //     bankname: "",
+  //     commission: "",
+  //     description: "",
+  //     category: "10",
+  //     domain: "",
+  //   },
+  //   validationSchema: websitvalidation,
+  //   onSubmit: (values) => {
+  //     console.log("vlaue of formik inside");
+  //     ApiCall.post("/website", values).then((result) => {});
+  //   },
+  // });
 
   const [status, setstatus] = useState("Pending");
   const [success, setsuccess] = useState(false);
@@ -101,24 +109,24 @@ export default function AdminTransaction() {
       <div style={{ flex: 1, marginLeft: "60px", marginRight: "60px" }}>
         <Spacer space="10" />
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Card Heading="Total Transactions" SubHeading="1450" Color="green" />
-          <Card Heading="Pending Transactions" SubHeading="10" Color="green" />
-          <Card Heading="Total Refund Amount" SubHeading="960 " Color="red" />
-        </div>
-        <Spacer space="10"></Spacer>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Card
-            Heading="Amount Sent by Advertisers"
-            SubHeading="25000 "
+            Heading="Total Transactions"
+            SubHeading={data.totaltrans}
             Color="green"
           />
           <Card
-            Heading="Amount Sent to Promoters"
-            SubHeading="145"
+            Heading="Amount Sent by Advertise"
+            SubHeading={data.brandcom}
+            Color="green"
+          />
+          <Card
+            Heading="Amount Sent to promoter"
+            SubHeading={data.paidtopromotercom}
             Color="red"
           />
-          <Card Heading="JVsea Earnings" SubHeading="256055" Color="red" />
         </div>
+        <Spacer space="10"></Spacer>
+        <div style={{ display: "flex", justifyContent: "space-between" }}></div>
 
         <div style={{ fontWeight: "bold", fontSize: "25px" }}>
           Administrator Bank Details
@@ -138,8 +146,8 @@ export default function AdminTransaction() {
               labelId="demo-simple-select-outlined-label"
               id="demo-simple-select-outlined"
               name="bankname"
-              value={formik.values.bankname}
-              onChange={formik.handleChange}
+              // value={formik.values.bankname}
+              // onChange={formik.handleChange}
               label="Bank Name"
             >
               {itemcategory.map((item) => {

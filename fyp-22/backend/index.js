@@ -81,6 +81,48 @@ app.post("/bankdetail", auth, async (req, res) => {
   }
 });
 
+app.get("/protransstat", auth, async (req, res) => {
+  const promoterId = await Promoter.findOne({
+    user: mongoose.Types.ObjectId(req.user.user_id),
+  });
+  const sale = await Sale.find({ promoterId, status: "20" }).populate("webid");
+  const trans = await Transaction.find({ promoterId });
+  const pending = await Sale.find({
+    promoterId,
+    status: "20",
+    paid: false,
+  }).populate("webid");
+  let pendingrevenue = 0;
+  let sum = 0;
+  sale.map(
+    (item) =>
+      (sum =
+        sum +
+        Math.floor(
+          (item.webid.commission *
+            item.products.reduce(
+              (num1, num2) => parseFloat(num2.price.replace(/,/g, "")) + num1,
+              0
+            )) /
+            100
+        ))
+  );
+  pending.map(
+    (item) =>
+      (pendingrevenue =
+        pendingrevenue +
+        Math.floor(
+          (item.webid.commission *
+            item.products.reduce(
+              (num1, num2) => parseFloat(num2.price.replace(/,/g, "")) + num1,
+              0
+            )) /
+            100
+        ))
+  );
+  return res.json({ sum, pendingrevenue, next: trans.reverse()[0].createdAt });
+});
+
 app.get("/promoterid", auth, async (req, res) => {
   console.log(req.user);
 
@@ -507,6 +549,49 @@ app.get("/adminpending", auth, async (req, res) => {
   res.json({ Refund, revenuecount, succeed, totalSale, pendingcom });
 });
 
+app.get("/admintransstat", auth, async (req, res) => {
+  const totaltrans = await Transaction.find({}).count();
+  const totaltransamount = await Sale.find({
+    status: "20",
+    recieved: true,
+    paid: false,
+  }).populate("webid");
+  let totaltransamountcount = 0;
+  let brandcom = 0;
+  totaltransamount.map((item) => {
+    (brandcom =
+      brandcom +
+      item.webid.commission *
+        item.products.map(
+          (v) =>
+            (totaltransamountcount =
+              totaltransamountcount + parseFloat(v.price.replace(/,/g, "")))
+        )) / 100;
+  });
+
+  console.log("damadkfadf", brandcom);
+
+  const totaltransamountpaid = await Sale.find({
+    status: "20",
+    recieved: true,
+    paid: true,
+  }).populate("webid");
+  let paidtopromoter = 0;
+  let paidtopromotercom = 0;
+  totaltransamount.map((item) => {
+    (paidtopromotercom =
+      paidtopromotercom +
+      item.webid.commission *
+        item.products.map(
+          (v) =>
+            (paidtopromoter =
+              paidtopromoter + parseFloat(v.price.replace(/,/g, "")))
+        )) / 100;
+  });
+
+  res.json({ totaltrans, brandcom, paidtopromotercom });
+});
+
 app.get("/prostat", auth, async (req, res) => {
   // const website = await Website.findOne({ user: req.user.user_id });
   const promoter = await Promoter.findOne({ user: req.user.user_id });
@@ -721,6 +806,7 @@ app.post("/updatesale", async (req, res) => {
   res.json(data);
 });
 
+app.get("/test", (req, res) => res.send("Toqeer"));
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });

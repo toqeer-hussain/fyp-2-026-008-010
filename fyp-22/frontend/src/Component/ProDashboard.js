@@ -45,7 +45,7 @@ export default function ProDashBoard() {
             SubHeading={data.revenuecount}
             Color="green"
           />
-          <Card Heading="Refunds" SubHeading={data.Refund} Color="red" />
+          <Card Heading="Returns" SubHeading={data.Refund} Color="red" />
           <Card
             Heading="Pen.Comissions"
             SubHeading={data.pendingcom}

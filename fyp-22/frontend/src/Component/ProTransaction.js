@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Border from "../UI/Border";
 import Card from "../UI/Card";
 import MenuItem from "../UI/MenuItem";
@@ -8,7 +8,27 @@ import Table from "../UI/Table";
 
 import ProTransaction from "../Tables/Brand/BrandTransaction";
 // import ProDashBoard from "./ProDashboard";
+
+import ApiCall from "../BackendCall";
+const getdate = (value) => {
+  console.log("what is vlaue", value);
+  var today = new Date(value);
+  today.setDate(today.getDate() + 15);
+  return (
+    today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate()
+  );
+};
 export default function Transaction() {
+  const [data, setdata] = useState({});
+  const getdata = async () => {
+    const response = await ApiCall.get("/protransstat");
+    console.log("data for promote", response.data);
+    setdata(response.data);
+  };
+  useEffect(() => {
+    getdata();
+  }, []);
+
   return (
     <div style={{ display: "flex" }}>
       <SideBar />
@@ -17,14 +37,18 @@ export default function Transaction() {
         <Spacer space="10" />
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Card
-            Heading="Comission Recieveds"
-            SubHeading=" RS 1450"
+            Heading="Comission Recieveds (Rs)"
+            SubHeading={`${data.sum}`}
             Color="green"
           />
-          <Card Heading="Comission Pending" SubHeading=" RS 140" Color="red" />
+          <Card
+            Heading="Comission Pending (Rs)"
+            SubHeading={`${data.pendingrevenue}`}
+            Color="red"
+          />
           <Card
             Heading="Next Payout"
-            SubHeading=" 24th June,2021"
+            SubHeading={getdate(data.next)}
             Color="green"
           />
         </div>

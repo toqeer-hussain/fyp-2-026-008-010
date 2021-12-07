@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Colors } from "../Constant/Colors";
 import MyButton from "../UI/MyButton";
 
@@ -6,6 +6,7 @@ import { Link, useHistory, useLocation } from "react-router-dom";
 import { UserContext } from "../App";
 
 import ApiCall from "../BackendCall";
+import { LocalHospitalTwoTone } from "@material-ui/icons";
 
 console.log(Colors.Primary);
 export default function Nav({ login }) {
@@ -13,8 +14,14 @@ export default function Nav({ login }) {
 
   const location = useLocation();
   const history = useHistory();
+  const [loggedin, setloggedin] = useState("");
 
   const NavHead = location.pathname.replace("/", "");
+
+  useEffect(() => {
+    setloggedin(localStorage.getItem("token"));
+  });
+
   console.log(NavHead);
   return (
     <div
@@ -39,15 +46,17 @@ export default function Nav({ login }) {
         </p>
       </div>
       <div>
-        <MyButton
-          fillColor="yellow"
-          style={{ marginRight: "20px" }}
-          onPress={() => {
-            history.push("/DashBoard");
-          }}
-        >
-          DashBoard
-        </MyButton>
+        {loggedin && (
+          <MyButton
+            fillColor="yellow"
+            style={{ marginRight: "20px" }}
+            onPress={() => {
+              history.push("/DashBoard");
+            }}
+          >
+            DashBoard
+          </MyButton>
+        )}
       </div>
       <div style={{ display: "flex" }}>
         <Link to="/Market">

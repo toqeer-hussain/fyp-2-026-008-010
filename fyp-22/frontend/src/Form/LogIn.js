@@ -126,6 +126,7 @@ export default function LogIn() {
                 id="standard-basic"
                 label="password"
                 name="password"
+                inputProps={{ type: "password" }}
                 variant="outlined"
                 placeholder="Enter the password"
               />
