@@ -11,8 +11,14 @@ import MuiAlert from "@material-ui/lab/Alert";
 
 const Uservalidation = Yup.object({
   email: Yup.string().email("Invalid email address").required(),
-  name: Yup.string().min(6).max(10).required(),
-  phonenumber: Yup.number().positive().integer(),
+  name: Yup.string()
+    .required()
+    .matches(/^[aA-zZ\s]+$/, "Only alphabets are allowed for this field "),
+  phonenumber: Yup.number()
+    .positive()
+    .integer()
+    .min(10, "min Length should be 10")
+    .max(10, "max Length should be 10"),
 });
 const passwordvalidation = Yup.object({
   password: Yup.string()
@@ -154,8 +160,8 @@ export default function PromoterProfile() {
             label="phonenumber"
             variant="outlined"
             name="phonenumber"
-            helperText="Format 03XXXXXXXXX"
-            inputProps={{ max: 11, maxlength: 11 }}
+            helperText="Format 3XXXXXXXXX"
+            inputProps={{ max: 10, maxlength: 10, minlength: 10 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">+92</InputAdornment>
