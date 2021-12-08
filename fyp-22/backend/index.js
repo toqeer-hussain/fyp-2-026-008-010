@@ -44,7 +44,15 @@ app.use("/user", UserRoute);
 app.use("/reset_password", ResetPassword);
 app.use("/website", website);
 
+app.get("/jvseabankdetail", auth, async (req, res) => {
+  const user = await User.findOne({ Role: "admin" });
+  const bankdetail = await BankDetail.findOne({ user: user?._id });
+  console.log("what is bankdetail", bankdetail);
+  res.json({ bankdetail });
+});
+
 app.get("/bankdetail/", auth, async (req, res) => {
+  User.findOne({});
   const poromid = await BankDetail.findOne({
     user: mongoose.Types.ObjectId(req.user.user_id),
   }).populate("user");
@@ -79,6 +87,61 @@ app.post("/bankdetail", auth, async (req, res) => {
     });
     return res.json(null);
   }
+});
+
+app.get("/brandtransstat", auth, async (req, res) => {
+  const promoterId = await Website.findOne({
+    user: mongoose.Types.ObjectId(req.user.user_id),
+  });
+  const sale = await Sale.find({ webid: promoterId, status: "20" }).populate(
+    "webid"
+  );
+  const trans = await Transaction.find({ webid: promoterId });
+  const pending = await Sale.find({
+    promoterId,
+    status: "20",
+
+    recieved: true,
+  }).populate("webid");
+  let pendingrevenue = 0;
+  let sum = 0;
+  sale.map(
+    (item) =>
+      (sum =
+        sum +
+        Math.floor(
+          (item.webid.commission *
+            item.products.reduce(
+              (num1, num2) => parseFloat(num2.price.replace(/,/g, "")) + num1,
+              0
+            )) /
+            100
+        ))
+  );
+  const pendingrate = await Sale.find({
+    webid: promoterId,
+    recieved: false,
+    status: "20",
+    paid: false,
+  }).populate("webid");
+  let pendingcom = 0;
+  pendingrate.map((item) => {
+    pendingcom =
+      pendingcom +
+      Math.floor(
+        (item.webid.commission *
+          item.products.reduce(
+            (num1, num2) => parseFloat(num2.price.replace(/,/g, "")) + num1,
+            0
+          )) /
+          100
+      );
+  });
+  return res.json({
+    sum,
+    pendingcom,
+    next: trans?.reverse()[0]?.createdAt,
+  });
 });
 
 app.get("/protransstat", auth, async (req, res) => {
@@ -120,7 +183,11 @@ app.get("/protransstat", auth, async (req, res) => {
             100
         ))
   );
-  return res.json({ sum, pendingrevenue, next: trans.reverse()[0].createdAt });
+  return res.json({
+    sum,
+    pendingrevenue,
+    next: trans?.reverse()[0]?.createdAt,
+  });
 });
 
 app.get("/promoterid", auth, async (req, res) => {
@@ -247,46 +314,77 @@ app.post("/transaction", async (req, res) => {
     accountNumber: req.body.accountnumber,
   }).populate("user");
 
-  if (req.body.Role == "advertiser") {
-    const website = await Website.findOne({ user: detail.user });
-    console.log("webid", website._id);
-    const sales = await Sale.find({
-      webid: website?._id,
-      recieved: false,
-      status: "20",
-      paid: false,
-    }).populate("webid");
-
-    sales.map(async (item) => {
-      console.log("id value", item.id);
-      await Sale.findByIdAndUpdate(mongoose.Types.ObjectId(item.id), {
-        recieved: true,
-      });
-    });
-  } else {
-    const pro = await Promoter.findOne({ user: detail.user });
-    const sales = await Sale.find({
-      promoterId: pro?._id,
-      recieved: true,
-      status: "20",
-      paid: false,
-    }).populate("webid");
-    sales.map(async (item) => {
-      console.log("id value", item.id);
-      await Sale.findByIdAndUpdate(mongoose.Types.ObjectId(item.id), {
-        paid: true,
-      });
-    });
-  }
-
-  // console.log("find bank", detail);
-  if (detail.user.Role == req.body.Role) console.log("find bank", detail);
+  let pendingcom = 0;
   if (detail) {
-    const trans = await Transaction.create({
-      price: req.body.price,
-      account: detail._id,
-    });
-    return res.json({ done: true, trans });
+    if (req.body.Role == "advertiser") {
+      const website = await Website.findOne({ user: detail.user });
+      console.log("webid", website._id);
+      const pending = await Sale.find({
+        webid: website?._id,
+        recieved: false,
+        status: "20",
+        paid: false,
+      }).populate("webid");
+
+      pending.map((item) => {
+        pendingcom =
+          pendingcom +
+          Math.floor(
+            (item.webid.commission *
+              item.products.reduce(
+                (num1, num2) => parseFloat(num2.price.replace(/,/g, "")) + num1,
+                0
+              )) /
+              100
+          );
+      });
+
+      pending.map(async (item) => {
+        console.log("id value", item.id);
+        await Sale.findByIdAndUpdate(mongoose.Types.ObjectId(item.id), {
+          recieved: true,
+        });
+      });
+    } else {
+      const pro = await Promoter.findOne({ user: detail.user });
+      console.log("value of pr", pro);
+      const pending = await Sale.find({
+        prommterId: pro?._id,
+        recieved: true,
+        status: "20",
+        paid: false,
+      }).populate("webid");
+      console.log("value of pending", pending);
+      pending.map((item) => {
+        pendingcom =
+          pendingcom +
+          Math.floor(
+            (item.webid.commission *
+              item.products.reduce(
+                (num1, num2) => parseFloat(num2.price.replace(/,/g, "")) + num1,
+                0
+              )) /
+              100
+          );
+      });
+      pending.map(async (item) => {
+        console.log("id value", item.id);
+        await Sale.findByIdAndUpdate(mongoose.Types.ObjectId(item.id), {
+          paid: true,
+        });
+      });
+    }
+
+    // console.log("find bank", detail);
+    if (detail.user.Role == req.body.Role) console.log("find bank", detail);
+    if (detail) {
+      const trans = await Transaction.create({
+        price: pendingcom,
+        Role: req.body.Role,
+        account: detail._id,
+      });
+      return res.json({ done: true, trans });
+    }
   }
   res.json({ done: false });
 });
@@ -490,7 +588,7 @@ app.get("/procom", async (req, res) => {
 
 app.get("/adminpending", auth, async (req, res) => {
   const website = await Website.findOne({ user: req.user.user_id });
-  console.log("webid", website._id);
+  // console.log("webid", website?._id);
   ////////////////////////// Pending Commission
   const pending = await Sale.find({
     webid: website?._id,
@@ -500,7 +598,7 @@ app.get("/adminpending", auth, async (req, res) => {
   }).populate("webid");
   let pendingcom = 0;
   pending.map((item) => {
-    pengindcom =
+    pendingcom =
       pendingcom +
       Math.floor(
         (item.webid.commission *
@@ -549,47 +647,35 @@ app.get("/adminpending", auth, async (req, res) => {
   res.json({ Refund, revenuecount, succeed, totalSale, pendingcom });
 });
 
-app.get("/admintransstat", auth, async (req, res) => {
+app.get("/admintransscreen", auth, async (req, res) => {
   const totaltrans = await Transaction.find({}).count();
-  const totaltransamount = await Sale.find({
-    status: "20",
-    recieved: true,
-    paid: false,
-  }).populate("webid");
-  let totaltransamountcount = 0;
-  let brandcom = 0;
-  totaltransamount.map((item) => {
-    (brandcom =
-      brandcom +
-      item.webid.commission *
-        item.products.map(
-          (v) =>
-            (totaltransamountcount =
-              totaltransamountcount + parseFloat(v.price.replace(/,/g, "")))
-        )) / 100;
-  });
+  const totalbrand = await Transaction.find({ Role: "advertiser" });
+  const totalpromoter = await Transaction.find({ Role: "promoter" });
+  // console.log("what is totaltrtansamount", totaltransamount);
+  let promotercom = totalpromoter.reduce((num1, num2) => num2.price + num1, 0);
+  let brandcom = totalbrand.reduce((num1, num2) => num2.price + num1, 0);
 
-  console.log("damadkfadf", brandcom);
+  // console.log("damadkfadf", brandcom);
 
-  const totaltransamountpaid = await Sale.find({
-    status: "20",
-    recieved: true,
-    paid: true,
-  }).populate("webid");
-  let paidtopromoter = 0;
-  let paidtopromotercom = 0;
-  totaltransamount.map((item) => {
-    (paidtopromotercom =
-      paidtopromotercom +
-      item.webid.commission *
-        item.products.map(
-          (v) =>
-            (paidtopromoter =
-              paidtopromoter + parseFloat(v.price.replace(/,/g, "")))
-        )) / 100;
-  });
+  // const totaltransamountpaid = await Sale.find({
+  //   status: "20",
+  //   recieved: true,
+  //   paid: true,
+  // }).populate("webid");
+  // let paidtopromoter = 0;
+  // let paidtopromotercom = 0;
+  // totaltransamountpaid.map((item) => {
+  //   (paidtopromotercom =
+  //     paidtopromotercom +
+  //     item.webid.commission *
+  //       item.products.map(
+  //         (v) =>
+  //           (paidtopromoter =
+  //             paidtopromoter + parseFloat(v.price.replace(/,/g, "")))
+  //       )) / 100;
+  // });
 
-  res.json({ totaltrans, brandcom, paidtopromotercom });
+  res.json({ totaltrans, brandcom, promotercom });
 });
 
 app.get("/prostat", auth, async (req, res) => {
@@ -629,8 +715,10 @@ app.get("/prostat", auth, async (req, res) => {
   const Pending = await Sale.find({
     promoterId: promoter,
     status: "20",
+
     paid: false,
-  });
+  }).populate("webid");
+
   console.log("pedning data", Pending);
   let pendingcom = 0;
   Pending.map((item) => {
@@ -720,7 +808,7 @@ app.get("/admintransstat", auth, async (req, res) => {
 
   const pending = await Sale.find({
     webid: website?._id,
-    recieved: false,
+    recieved: true,
     status: "20",
     paid: false,
   }).populate("webid");
@@ -737,7 +825,7 @@ app.get("/admintransstat", auth, async (req, res) => {
           100
       );
   });
-  let dd = translist;
+
   res.json({
     totalcommission,
     pendingcom,

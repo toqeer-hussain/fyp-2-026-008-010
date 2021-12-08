@@ -106,6 +106,7 @@ export default function LogIn() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.Password}
+                inputProps={{ type: "password" }}
                 id="standard-basic"
                 label="Password"
                 name="password"

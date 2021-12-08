@@ -21,7 +21,7 @@ import ApiCall from "../BackendCall";
 
 const Uservalidation = Yup.object({
   email: Yup.string().email("Invalid email address").required(),
-  name: Yup.string().min(6).max(10).required(),
+  name: Yup.string().required(),
   password: Yup.string()
     .min(8)
     .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/, {

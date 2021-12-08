@@ -8,7 +8,7 @@ import EditSharpIcon from "@material-ui/icons/EditSharp";
 import { useLocation } from "react-router-dom";
 import { UserContext } from "../App";
 import jwt_decode from "jwt-decode";
-
+import MoreHoriz from "@material-ui/icons/MoreHoriz";
 export default function SideBar() {
   // const [selected, setselected] = useState("Dashboard");
   const location = useLocation();
@@ -18,7 +18,7 @@ export default function SideBar() {
 
   console.log("user user", user);
   useEffect(() => {
-    setuser(jwt_decode(JSON.parse(localStorage.getItem("token"))).name);
+    setuser(jwt_decode(JSON.parse(localStorage.getItem("token"))));
   }, []);
 
   return (
@@ -31,7 +31,7 @@ export default function SideBar() {
         minHeight: "568px",
       }}
     >
-      <MenuItem Icon={AccountCircleIcon} nothead subheading={user} />
+      <MenuItem Icon={AccountCircleIcon} nothead subheading={user.name} />
       <MenuItem
         Icon={DashboardIcon}
         active={selected == "Dashboard"}
@@ -44,11 +44,20 @@ export default function SideBar() {
         subheading="Transaction"
         // onPress={setselected}
       />
-      {!action.admin && (
+
+      {user.Role != "admin" && (
         <MenuItem
           Icon={EditSharpIcon}
           active={selected == "Editing"}
           subheading="Editing"
+          // onPress={setselected}
+        />
+      )}
+      {user.Role == "admin" && (
+        <MenuItem
+          Icon={MoreHoriz}
+          active={selected == "Pending"}
+          subheading="Pending"
           // onPress={setselected}
         />
       )}

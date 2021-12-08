@@ -65,7 +65,9 @@ export default function MyTable({ promoter }) {
                 <TableCell align="left">{row.name}</TableCell>
                 <TableCell align="right">{row.totalclick}</TableCell>
                 <TableCell align="right">{row.salecount}</TableCell>
-                <TableCell align="right">{row.conversion.toFixed(2)}</TableCell>
+                <TableCell align="right">
+                  {row.conversion?.toFixed(2) || "0"}
+                </TableCell>
                 <TableCell align="right">{row.returncount}</TableCell>
                 <TableCell align="right">{row.returnper || "0"}</TableCell>
 

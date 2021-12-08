@@ -181,7 +181,7 @@ export default function BrandProfileComponent() {
             fullWidth
             type="number"
             id="standard-basic"
-            label="Commission"
+            label="Commission %"
             variant="outlined"
             name="commission"
             placeholder="Enter the Commission"

@@ -85,6 +85,16 @@ function App() {
       ) : (
         <Redirect to="/404" />
       );
+    } else if (value == "Pending") {
+      return token ? (
+        Role == "admin" ? (
+          <AdminBrandProfile />
+        ) : (
+          <Redirect to="/404" />
+        )
+      ) : (
+        <Redirect to="/404" />
+      );
     } else
       return token ? (
         Role == "admin" ? (
@@ -119,7 +129,7 @@ function App() {
             <Route path="/Market">
               <MarketPlace />
             </Route>
-            <Route path="/AdminBrandProfile">
+            <Route path="/Pending">
               <AdminBrandProfile />
             </Route>
 

@@ -11,12 +11,16 @@ import ProTransaction from "../Tables/Brand/BrandTransaction";
 
 import ApiCall from "../BackendCall";
 const getdate = (value) => {
-  console.log("what is vlaue", value);
-  var today = new Date(value);
-  today.setDate(today.getDate() + 15);
-  return (
-    today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate()
-  );
+  if (value) {
+    console.log("what is vlaue", value);
+    var today = new Date(value);
+    today.setDate(today.getDate() + 15);
+    return (
+      today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate()
+    );
+  } else {
+    return undefined;
+  }
 };
 export default function Transaction() {
   const [data, setdata] = useState({});
@@ -38,17 +42,17 @@ export default function Transaction() {
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Card
             Heading="Comission Recieveds (Rs)"
-            SubHeading={`${data.sum}`}
+            SubHeading={`${data.sum || "0"}`}
             Color="green"
           />
           <Card
             Heading="Comission Pending (Rs)"
-            SubHeading={`${data.pendingrevenue}`}
+            SubHeading={`${data.pendingrevenue || "0"}`}
             Color="red"
           />
           <Card
             Heading="Next Payout"
-            SubHeading={getdate(data.next)}
+            SubHeading={getdate(data.next) || "-"}
             Color="green"
           />
         </div>

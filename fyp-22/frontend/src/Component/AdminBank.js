@@ -81,7 +81,7 @@ const bankvalidation = Yup.object({
 export default function Probankdetail() {
   const [data, setdata] = useState(null);
   const [success, setsuccess] = useState(false);
-  const [text, settext] = useState("");
+  const [text, settext] = useState(false);
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: data || {
@@ -94,7 +94,9 @@ export default function Probankdetail() {
       const response = await ApiCall.post("/bankdetail", values);
       if (response.data.updated) {
         setsuccess(true);
-      } else settext(true);
+      } else {
+        settext(true);
+      }
     },
   });
 

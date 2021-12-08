@@ -10,7 +10,8 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import MyButton from "../UI/MyButton";
 import ApiCall from "../BackendCall";
-
+import MuiAlert from "@material-ui/lab/Alert";
+import { InputAdornment, Snackbar } from "@material-ui/core";
 const bankvalidation = Yup.object({
   bankname: Yup.string().required(),
   ownername: Yup.string().required(),
@@ -67,21 +68,37 @@ export default function AdminBrand() {
   const [data, setdata] = useState(null);
   const [category, setcategory] = useState("10");
   const [accountnumber, setaccountnumber] = useState(null);
-  const [price, setprice] = useState();
-  const [name, setname] = useState("");
+  const [text, settext] = useState(false);
+  const [success, setsuccess] = useState(false);
 
   const handlesubmit = async () => {
     const response = await ApiCall.post("/transaction", {
       category,
       accountnumber,
-      price,
+
       Role: "advertiser",
     });
+    if (response.data.done) {
+      settext(true);
+      setsuccess(true);
+    } else {
+      setsuccess(true);
+    }
     console.log(response.data);
   };
   return (
     <div>
       <div style={{ display: "flex" }}>
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          open={success}
+          autoHideDuration={2000}
+          onClose={() => setsuccess(false)}
+        >
+          <MuiAlert variant="filled" elevation="6" severity="success">
+            {text ? " Done Transcation" : "Account No not found"}
+          </MuiAlert>
+        </Snackbar>
         <FormControl
           variant="outlined"
           fullWidth
@@ -115,7 +132,7 @@ export default function AdminBrand() {
           inputProps={{ type: "Number" }}
           variant="outlined"
         />
-        <TextField
+        {/* <TextField
           style={{ marginRight: "12px" }}
           value={price}
           onChange={(e) => setprice(e.target.value)}
@@ -124,7 +141,7 @@ export default function AdminBrand() {
           label="Price"
           inputProps={{ type: "Number" }}
           variant="outlined"
-        />
+        /> */}
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <MyButton onPress={handlesubmit}>Verify</MyButton>

@@ -48,7 +48,7 @@ export default function ProDashBoard() {
           <Card Heading="Returns" SubHeading={data.Refund} Color="red" />
           <Card
             Heading="Pen.Comissions"
-            SubHeading={data.pendingcom}
+            SubHeading={data.pendingcom || 0}
             Color="red"
           />
         </div>

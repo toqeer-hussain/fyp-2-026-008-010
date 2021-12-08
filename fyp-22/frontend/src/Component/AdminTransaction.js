@@ -18,6 +18,7 @@ import SideBar from "../UI/SideBar";
 import * as Yup from "yup";
 import AdminBrand from "./AdminBrand";
 import AdminPromoter from "./AdminPromoter";
+import AdminBank from "./AdminBank";
 const websitvalidation = Yup.object({
   brand: Yup.string().required(),
   description: Yup.string().required(),
@@ -77,7 +78,7 @@ let itemcategory = [
 export default function AdminTransaction() {
   const [data, setdata] = useState({});
   const getdata = async () => {
-    const response = await ApiCall.get("/admintransstat");
+    const response = await ApiCall.get("/admintransscreen");
     console.log("recieved", response.data);
     setdata(response.data);
   };
@@ -121,7 +122,7 @@ export default function AdminTransaction() {
           />
           <Card
             Heading="Amount Sent to promoter"
-            SubHeading={data.paidtopromotercom}
+            SubHeading={data.promotercom}
             Color="red"
           />
         </div>
@@ -133,45 +134,8 @@ export default function AdminTransaction() {
         </div>
         <Border space="5" />
         <Spacer space="10" />
-        <div style={{ display: "flex" }}>
-          <FormControl
-            variant="outlined"
-            fullWidth
-            style={{ marginRight: "12px" }}
-          >
-            <InputLabel id="demo-simple-select-outlined-label">
-              Bank Name
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-outlined-label"
-              id="demo-simple-select-outlined"
-              name="bankname"
-              // value={formik.values.bankname}
-              // onChange={formik.handleChange}
-              label="Bank Name"
-            >
-              {itemcategory.map((item) => {
-                return <MenuItem value={item.key}>{item.value}</MenuItem>;
-              })}
-            </Select>
-          </FormControl>
-
-          <TextField
-            style={{ marginRight: "12px" }}
-            value="Toqeer Hussain"
-            id="standard-basic"
-            label="Account Holder"
-            variant="outlined"
-          />
-          <TextField
-            style={{ marginRight: "12px" }}
-            value="12458963177"
-            id="standard-basic"
-            label="Account Number"
-            variant="outlined"
-          />
-        </div>
-
+        <AdminBank />
+        <Spacer space="20" />
         <div style={{ fontWeight: "bold", fontSize: "25px" }}>
           Verify Advertiser Transaction
         </div>
